@@ -40,9 +40,9 @@ namespace LogFileAnalyssis
         public long noOfCompressedFileRequestedInSession;
         public long noOfMultimediaFileRequestedInSession;
         public long noOfOtherFileFormatRequestedInSession;
-        public DateTime totalTimeOfTheSession;
-        public DateTime avgTimeBetweenTowHTMLRequests;
-        public DateTime standardDeviationOfTimeBetweenRequests;
+        public float totalTimeOfTheSession;
+        public float avgTimeBetweenTowHTMLRequests;
+        public float standardDeviationOfTimeBetweenRequests;
         public long noOfPagesRequestedInNightTime;
         public long noOfRequestReapted;
         public long onOfrequestesWithErrors;
@@ -58,6 +58,8 @@ namespace LogFileAnalyssis
         public bool isRobotstxtVisited;
         public long noOfRequestWithHEADMethod;
         public long noOfRequestWithUnassignedReferer;
+
+        public DateTime sessionStartTime;
 
         public Session(int id)
         {
@@ -251,8 +253,14 @@ ExecuteQuery(txtSQLQuery);
         Hashtable sessionNametoIdhashtable = new Hashtable();
         List<Session> session = new List<Session>();
         List<Request> requestList = new List<Request>();
-         int countLines = 0;
-                int sessionId =0,tempInt=0;
+        int countLines = -1;
+        int sessionId =-1,tempInt=0;
+        private SQLiteConnection sql_con;
+        private SQLiteCommand sql_cmd;
+        private SQLiteDataAdapter DB;
+        private DataSet DS = new DataSet();
+        private DataTable DT = new DataTable();
+        private String statusCode = "";
         public MainWindow()
         {
             InitializeComponent();
@@ -269,115 +277,244 @@ ExecuteQuery(txtSQLQuery);
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
+            //ThreadStart childref = new ThreadStart(CoreProcessing);
+            //Thread childThread = new Thread(childref);
+            //childThread.Start();
+
+            //ThreadStart statusTheread = new ThreadStart(UpdateStatusBar);
+            //Thread cstatusThread = new Thread(statusTheread);
+            //cstatusThread.Start();
+            statusBar.Content = "hsfjkadhgk";
+          
             if (!filePathString.Equals(""))
             {
+                win.IsEnabled = false;
+                this.IsEnabled = false;
                 StreamReader reader = new StreamReader(filePathString);
-                
-               
+
+                statusBar.Content = "Please Wait (Parsing the log file...)";
                 string line;
                 Thread loadingAnimation = new Thread(new ThreadStart(CustomAnimation));
                 while ((line = reader.ReadLine()) != null)
                 {
-                    //if(countLines==0)
-                    //statusBar.Content = line;
-                    String[] s = line.Split();
-                    requestList.Add(new Request(line));
                    
+                    String[] s = line.Split();
+
+                    requestList.Add(new Request(line));
+                    countLines++;
+
                     if (!sessionNametoIdhashtable.Contains(requestList[countLines].userName + " " + requestList[countLines].userAgent))
                     {
-                        sessionNametoIdhashtable.Add(requestList[countLines].userName + " " + requestList[countLines].userAgent , sessionId);
-                        session.Add(new Session(sessionId));
-                        session[sessionId].requestIdlist.Add(countLines);
                         sessionId++;
+                        sessionNametoIdhashtable.Add(requestList[countLines].userName + " " + requestList[countLines].userAgent, sessionId);
+                        session.Add(new Session(sessionId));
+                        session[sessionId].sessionStartTime = requestList[countLines].timeStamp;
+                        session[sessionId].requestIdlist.Add(countLines);
+                        UpdateSessionClassVariables();
+
+
                     }
                     else
                     {
                         session[(int)sessionNametoIdhashtable[requestList[countLines].userName + " " + requestList[countLines].userAgent]].requestIdlist.Add(countLines);
-                    }
-                    lable_tatalPages_Copy1.Content = sessionId;
+                        UpdateSessionClassVariables();
 
-                    countLines++;
+                    }
+                   
+                    //GC.Collect();
+                    //GC.WaitForPendingFinalizers();
                 }
-                for (int i = 0; i < sessionId - 1;i++ )
+
+                /* code for inserting into database */
+                statusBar.Content = "Please Wait (Inserting session detailsinto database...)";
+                for (int i = 0; i < sessionId - 1; i++)
                 {
-                    tempInt = tempInt + session[i].requestIdlist.Count;
+                    UpdateDataBase(i);
                 }
-                lable_tatalPages_Copy.Content = tempInt.ToString();
                 
+                statusBar.Content = "Processing Completed...";
                 reader.Close();
                 loadingAnimation.Abort();
             }
-            else 
+            else
             {
                 System.Windows.MessageBox.Show("Select any File for Analysis...");
             }
 
+            win.IsEnabled = true;
+          
         }
 
+       
+        private void UpdateStatusBar()
+        {
+           // statusBar.Content = statusCode;
+        }
         private void CustomAnimation()
         {
-            
+            statusBar.Content = 3;
         }
         private void UpdateSessionClassVariables()
         {
-            DateTime tFirstHTMLReq, tLastHTMLReq;
+            DateTime tFirstHTMLReq = session[sessionId].sessionStartTime, tLastHTMLReq = session[sessionId].sessionStartTime;
             /* Updating no of page request part */
             session[sessionId].totalNoOfPagesRequestedInSession++;
-            if (requestList[countLines].pageLastVisited.Contains(".gif") || requestList[countLines].pageLastVisited.Contains(".jpeg") || requestList[countLines].pageLastVisited.Contains(".jpg") || requestList[countLines].pageLastVisited.Contains(".png"))
+            try
             {
-                session[sessionId].noOfImagePagesRequestedInSession++;
-                
-            }
-            else if(requestList[countLines].pageLastVisited.Contains(".ps")||requestList[countLines].pageLastVisited.Contains(".pdf"))
-            {
-                session[sessionId].noOfBinaryDocumentsRequestedInSession++;
-                
-            }
-            else if (requestList[countLines].pageLastVisited.Contains(".cgi") || requestList[countLines].pageLastVisited.Contains(".exe"))
-            {
-                session[sessionId].noOfBinaryExeFileRequestedInSession++;
-                
-            }
-            else if (requestList[countLines].pageLastVisited.Contains("robots.txt"))
-            {
-                session[sessionId].isRobotstxtVisited=true;
-                
-            }
-            else if (requestList[countLines].pageLastVisited.Contains(".htm") || requestList[countLines].pageLastVisited.Contains(".html"))
-            {
-                session[sessionId].noOfHTMLFileRequestedInSession++;
-                if (session[sessionId].noOfHTMLFileRequestedInSession == 1)
-                    tFirstHTMLReq = requestList[countLines].timeStamp;
+                if (requestList[countLines].pageLastVisited.Contains(".gif") || requestList[countLines].pageLastVisited.Contains(".jpeg") || requestList[countLines].pageLastVisited.Contains(".jpg") || requestList[countLines].pageLastVisited.Contains(".png"))
+                {
+                    session[sessionId].noOfImagePagesRequestedInSession++;
+
+                }
+                else if (requestList[countLines].pageLastVisited.Contains(".ps") || requestList[countLines].pageLastVisited.Contains(".pdf"))
+                {
+                    session[sessionId].noOfBinaryDocumentsRequestedInSession++;
+
+                }
+                else if (requestList[countLines].pageLastVisited.Contains(".cgi") || requestList[countLines].pageLastVisited.Contains(".exe"))
+                {
+                    session[sessionId].noOfBinaryExeFileRequestedInSession++;
+
+                }
+                else if (requestList[countLines].pageLastVisited.Contains("robots.txt"))
+                {
+                    session[sessionId].isRobotstxtVisited = true;
+
+                }
+                else if (requestList[countLines].pageLastVisited.Contains(".htm") || requestList[countLines].pageLastVisited.Contains(".html"))
+                {
+                    session[sessionId].noOfHTMLFileRequestedInSession++;
+                    if (session[sessionId].noOfHTMLFileRequestedInSession == 1)
+                        tFirstHTMLReq = requestList[countLines].timeStamp;
+                    else
+                        tLastHTMLReq = requestList[countLines].timeStamp;
+                    // average time in minutes//
+                    session[sessionId].avgTimeBetweenTowHTMLRequests = (float)(((tLastHTMLReq - tFirstHTMLReq).TotalMinutes) / (session[sessionId].noOfHTMLFileRequestedInSession));
+                    session[sessionId].totalTimeOfTheSession = (float)(tLastHTMLReq - tFirstHTMLReq).TotalMinutes;
+                }
+                else if (requestList[countLines].pageLastVisited.Contains(".txt") || requestList[countLines].pageLastVisited.Contains(".c") || requestList[countLines].pageLastVisited.Contains(".java") || requestList[countLines].pageLastVisited.Contains(".php"))
+                {
+                    session[sessionId].noOfAsciiFilerequestedInSession++;
+
+                }
+                else if (requestList[countLines].pageLastVisited.Contains(".zip") || requestList[countLines].pageLastVisited.Contains(".gz") || requestList[countLines].pageLastVisited.Contains(".rar"))
+                {
+                    session[sessionId].noOfCompressedFileRequestedInSession++;
+
+                }
+                else if (requestList[countLines].pageLastVisited.Contains(".wav") || requestList[countLines].pageLastVisited.Contains(".mpg") || requestList[countLines].pageLastVisited.Contains(".mpeg") || requestList[countLines].pageLastVisited.Contains(".avi") || requestList[countLines].pageLastVisited.Contains(".mp4") || requestList[countLines].pageLastVisited.Contains(".3gp") || requestList[countLines].pageLastVisited.Contains(".flv"))
+                {
+                    session[sessionId].noOfMultimediaFileRequestedInSession++;
+
+                }
                 else
-                    tLastHTMLReq = requestList[countLines].timeStamp;
-                // average time in minutes//
-                session[sessionId].avgTimeBetweenTowHTMLRequests = ((tLastHTMLReq - tFirstHTMLReq))/(session[sessionId].noOfHTMLFileRequestedInSession);
+                {
+                    session[sessionId].noOfOtherFileFormatRequestedInSession++;
+
+                }
+                /* Updating the time period */
+                if (requestList[countLines].timeStamp.Hour <= 7 && requestList[countLines].timeStamp.ToString().Contains("AM"))
+                {
+                    session[sessionId].noOfPagesRequestedInNightTime++;
+                }
+
+                if (Convert.ToInt32(requestList[countLines].sucessRate) == 400)
+                {
+                    session[sessionId].onOfrequestesWithErrors++;
+                }
+                if (requestList[countLines].pageRequestMethod.Contains("GET"))
+                {
+                    session[sessionId].noOfRequestWithGETMethod++;
+                }
+                else if (requestList[countLines].pageRequestMethod.Contains("POST"))
+                {
+                    session[sessionId].noOfRequestWithPOSTMethod++;
+                }
+                else if (requestList[countLines].pageRequestMethod.Contains("HEAD"))
+                {
+                    session[sessionId].noOfRequestWithHEADMethod++;
+                }
+                else
+                {
+                    session[sessionId].noOfRequestWithOtherMethod++;
+                }
+                if (requestList[countLines].url.Equals("-"))
+                {
+                    session[sessionId].noOfRequestWithUnassignedReferer++;
+                }
             }
-            else if (requestList[countLines].pageLastVisited.Contains(".txt") || requestList[countLines].pageLastVisited.Contains(".c") || requestList[countLines].pageLastVisited.Contains(".java"))
+            catch(Exception e)
+            {}
+        }
+        private void UpdateDataBase(int tempSessionId)
+        {
+            int p1 = tempSessionId;
+            long p2 = session[tempSessionId].totalNoOfPagesRequestedInSession;
+            float p3 = ((float)session[tempSessionId].noOfImagePagesRequestedInSession / p2) * 100;
+            float p4 = ((float)session[tempSessionId].noOfBinaryDocumentsRequestedInSession / p2) * 100;
+            float p5 = ((float)session[tempSessionId].noOfBinaryExeFileRequestedInSession / p2) * 100;
+            String p6 = session[tempSessionId].isRobotstxtVisited.ToString();
+            float p7 = ((float)session[tempSessionId].noOfHTMLFileRequestedInSession / p2) * 100;
+            float p8 = ((float)session[tempSessionId].noOfAsciiFilerequestedInSession / p2) * 100;
+            float p9 = ((float)session[tempSessionId].noOfCompressedFileRequestedInSession / p2) * 100;
+            float p10 = ((float)session[tempSessionId].noOfMultimediaFileRequestedInSession / p2) * 100;
+            float p11 = ((float)session[tempSessionId].noOfOtherFileFormatRequestedInSession / p2) * 100;
+            float p12 = session[tempSessionId].totalTimeOfTheSession;
+            float p13 = session[tempSessionId].avgTimeBetweenTowHTMLRequests;
+            long p14 = session[tempSessionId].noOfPagesRequestedInNightTime;
+            long p15 = session[tempSessionId].noOfRequestReapted;
+            float p16 = ((float)session[tempSessionId].onOfrequestesWithErrors / p2) * 100;
+            float p17 = ((float)session[tempSessionId].noOfRequestWithGETMethod / p2) * 100;
+            float p18 = ((float)session[tempSessionId].noOfRequestWithPOSTMethod / p2) * 100;
+            float p19 = ((float)session[tempSessionId].noOfRequestWithHEADMethod / p2) * 100;
+            float p20 = ((float)session[tempSessionId].noOfRequestWithOtherMethod / p2) * 100;
+            long p21 = session[tempSessionId].depthOfTheTraversal;
+            long p22 = session[tempSessionId].noOfHTMLFileRequestedInSession;
+            float p23 = ((float)session[tempSessionId].noOfRequestWithUnassignedReferer / p2) * 100;
+            String p24 = session[tempSessionId].isMultipleIPSEssion.ToString();
+            String p25 = session[tempSessionId].isMultiAgentSession.ToString();
+
+            string txtSQLQuery = "insert into  session values ('" + p1 + "','" + p2 + "','" + p3 + "','" + p4 + "','" + p5 + "','" + p6 + "','" + p7 + "','" + p8 + "','" + p9 + "','" + p10 + "','" + p11 + "','" + p12 + "','" + p13 + "','" + p14 + "','" + p15 + "','" + p16 + "','" + p17 + "','" + p18 + "','" + p19 + "','" + p20 + "','" + p21 + "','" + p22 + "','" + p23 + "','" + p24 + "','" + p25 + "')";
+            ExecuteQuery(txtSQLQuery);
+        }
+        private void SetConnection()
+        {
+            sql_con = new SQLiteConnection
+                ("Data Source=RequestTable;Version=3;New=False;Compress=True;");
+        }
+        private void ExecuteQuery(string txtQuery)
+        {
+            try
             {
-                session[sessionId].noOfAsciiFilerequestedInSession++;
-                
+                SetConnection();
+                sql_con.Open();
+                sql_cmd = sql_con.CreateCommand();
+                sql_cmd.CommandText = txtQuery;
+                sql_cmd.ExecuteNonQuery();
+                sql_con.Close();
             }
-            else if (requestList[countLines].pageLastVisited.Contains(".zip") || requestList[countLines].pageLastVisited.Contains(".gz") || requestList[countLines].pageLastVisited.Contains(".rar"))
-            {
-                session[sessionId].noOfCompressedFileRequestedInSession++;
-                
-            }
-            else if (requestList[countLines].pageLastVisited.Contains(".wav") || requestList[countLines].pageLastVisited.Contains(".mpg") || requestList[countLines].pageLastVisited.Contains(".mpeg") || requestList[countLines].pageLastVisited.Contains(".avi") || requestList[countLines].pageLastVisited.Contains(".mp4") || requestList[countLines].pageLastVisited.Contains(".3gp") || requestList[countLines].pageLastVisited.Contains(".flv"))
-            {
-                session[sessionId].noOfMultimediaFileRequestedInSession++;
-                
-            }
-            else 
-            {
-                session[sessionId].noOfOtherFileFormatRequestedInSession++;
-                
-            }
-            /* Updating the time period */
-            if (requestList[countLines].timeStamp.Hour <= 7 && requestList[countLines].timeStamp.ToString().Contains("AM"))
-            {
-                session[sessionId].noOfPagesRequestedInNightTime++;
-            }
+            catch (Exception e)
+            { }
+        }
+        private void LoadData()
+        {
+            //SetConnection();
+            //sql_con.Open();
+            //sql_cmd = sql_con.CreateCommand();
+            //string CommandText = "select id, desc from mains";
+            //DB = new SQLiteDataAdapter(CommandText, sql_con);
+            //DS.Reset();
+            //DB.Fill(DS);
+            //DT = DS.Tables[0];
+            //Grid.DataSource = DT;
+            //sql_con.Close();
+        }
+        private void Add()
+        {
+            int i = 9;
+            String sa = "Hi";
+           // string txtSQLQuery = "insert into  test values ('" + i.ToString() + "','" + sa + "')";
+           // ExecuteQuery(txtSQLQuery);
         }
         private void bOpenFileDialog_Click(object sender, RoutedEventArgs e)
         {

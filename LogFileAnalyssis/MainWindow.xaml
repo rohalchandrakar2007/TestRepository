@@ -1,8 +1,8 @@
 ﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="LogFileAnalyssis.MainWindow"
-        Title="MainWindow" Height="664.933" Width="800" Background="#FFFBF9F9" Visibility="Visible" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="None" AllowsTransparency="True">
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" x:Name="win" mc:Ignorable="d" x:Class="LogFileAnalyssis.MainWindow"
+        Title="MainWindow" Height="664.933" Width="800" Background="#FFFBF9F9" Visibility="Visible" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="None" SizeToContent="WidthAndHeight">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -29,45 +29,45 @@
                  HorizontalAlignment="Left" VerticalAlignment="Top" 
                  Background="Beige" />
         <Label x:Name="statusBar" Content="Status Bar..." HorizontalAlignment="Left" Margin="10,631,0,0" VerticalAlignment="Top" Width="780" Height="32"/>
-        <Label x:Name="lable_tatalPages" Content="totalPages" HorizontalAlignment="Left" Margin="31,119,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Images" Content="# Images" HorizontalAlignment="Left" Margin="31,152,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_BinaryDocs" Content="# Binary Docs" HorizontalAlignment="Left" Margin="31,185,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_BinaryExe" Content="# Binary Exec" HorizontalAlignment="Left" Margin="31,218,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_robotstxt" Content="robots.txt" HorizontalAlignment="Left" Margin="31,251,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_HTML" Content="# HTML" HorizontalAlignment="Left" Margin="31,284,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Ascii" Content="# Ascii" HorizontalAlignment="Left" Margin="31,316,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Zip" Content="# Zip" HorizontalAlignment="Left" Margin="31,349,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Multimedia" Content="# Multimedia" HorizontalAlignment="Left" Margin="31,382,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Other" Content="# Other" HorizontalAlignment="Left" Margin="31,415,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_TotalTime" Content="totalTime" HorizontalAlignment="Left" Margin="31,448,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_avgTime" Content="avgTime" HorizontalAlignment="Left" Margin="31,481,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_stdevTime" Content="stDevTime" HorizontalAlignment="Left" Margin="31,515,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_tatalPages_Copy" Content=" " HorizontalAlignment="Left" Margin="193,119,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Images_Copy" Content=" " HorizontalAlignment="Left" Margin="193,152,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_BinaryDocs_Copy" Content=" " HorizontalAlignment="Left" Margin="193,185,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_BinaryExe_Copy" Content=" " HorizontalAlignment="Left" Margin="193,218,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_robotstxt_Copy" Content="" HorizontalAlignment="Left" Margin="193,251,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_HTML_Copy" Content=" " HorizontalAlignment="Left" Margin="193,284,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Ascii_Copy" Content=" " HorizontalAlignment="Left" Margin="193,316,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Zip_Copy" Content=" " HorizontalAlignment="Left" Margin="193,349,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Multimedia_Copy" Content=" " HorizontalAlignment="Left" Margin="193,382,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Other_Copy" Content="" HorizontalAlignment="Left" Margin="193,415,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_TotalTime_Copy" Content=" " HorizontalAlignment="Left" Margin="193,448,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_avgTime_Copy" Content=" " HorizontalAlignment="Left" Margin="193,481,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_stdevTime_Copy" Content=" " HorizontalAlignment="Left" Margin="193,515,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_sessionTime_Copy1" Content="Night" HorizontalAlignment="Left" Margin="446,120,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_tatalPages_Copy1" Content="Repeated" HorizontalAlignment="Left" Margin="446,152,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Images_Copy1" Content="Error" HorizontalAlignment="Left" Margin="446,185,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_BinaryDocs_Copy1" Content="GET" HorizontalAlignment="Left" Margin="446,218,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_BinaryExe_Copy1" Content="POST" HorizontalAlignment="Left" Margin="446,251,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_robotstxt_Copy1" Content="HEAD" HorizontalAlignment="Left" Margin="446,284,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_HTML_Copy1" Content="OTHER" HorizontalAlignment="Left" Margin="446,317,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Ascii_Copy1" Content="width" HorizontalAlignment="Left" Margin="446,349,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Zip_Copy1" Content="depth" HorizontalAlignment="Left" Margin="446,382,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Multimedia_Copy1" Content="length" HorizontalAlignment="Left" Margin="446,415,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_Other_Copy1" Content="referrer =&quot;-&quot;" HorizontalAlignment="Left" Margin="446,448,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_TotalTime_Copy1" Content="MultiIP" HorizontalAlignment="Left" Margin="446,481,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_avgTime_Copy1" Content="MultiAgent" HorizontalAlignment="Left" Margin="446,514,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
+        <Label x:Name="lable_tatalPages" Content="totalPages" HorizontalAlignment="Left" Margin="31,119,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Images" Content="# Images" HorizontalAlignment="Left" Margin="31,152,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_BinaryDocs" Content="# Binary Docs" HorizontalAlignment="Left" Margin="31,185,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_BinaryExe" Content="# Binary Exec" HorizontalAlignment="Left" Margin="31,218,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_robotstxt" Content="robots.txt" HorizontalAlignment="Left" Margin="31,251,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_HTML" Content="# HTML" HorizontalAlignment="Left" Margin="31,284,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Ascii" Content="# Ascii" HorizontalAlignment="Left" Margin="31,316,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Zip" Content="# Zip" HorizontalAlignment="Left" Margin="31,349,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Multimedia" Content="# Multimedia" HorizontalAlignment="Left" Margin="31,382,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Other" Content="# Other" HorizontalAlignment="Left" Margin="31,415,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_TotalTime" Content="totalTime" HorizontalAlignment="Left" Margin="31,448,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_avgTime" Content="avgTime" HorizontalAlignment="Left" Margin="31,481,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_stdevTime" Content="stDevTime" HorizontalAlignment="Left" Margin="31,515,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_tatalPages_Copy" Content=" " HorizontalAlignment="Left" Margin="193,119,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Images_Copy" Content=" " HorizontalAlignment="Left" Margin="193,152,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_BinaryDocs_Copy" Content=" " HorizontalAlignment="Left" Margin="193,185,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_BinaryExe_Copy" Content=" " HorizontalAlignment="Left" Margin="193,218,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_robotstxt_Copy" Content="" HorizontalAlignment="Left" Margin="193,251,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_HTML_Copy" Content=" " HorizontalAlignment="Left" Margin="193,284,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Ascii_Copy" Content=" " HorizontalAlignment="Left" Margin="193,316,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Zip_Copy" Content=" " HorizontalAlignment="Left" Margin="193,349,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Multimedia_Copy" Content=" " HorizontalAlignment="Left" Margin="193,382,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Other_Copy" Content="" HorizontalAlignment="Left" Margin="193,415,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_TotalTime_Copy" Content=" " HorizontalAlignment="Left" Margin="193,448,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_avgTime_Copy" Content=" " HorizontalAlignment="Left" Margin="193,481,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_stdevTime_Copy" Content=" " HorizontalAlignment="Left" Margin="193,515,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_sessionTime_Copy1" Content="Night" HorizontalAlignment="Left" Margin="446,120,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_tatalPages_Copy1" Content="Repeated" HorizontalAlignment="Left" Margin="446,152,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Images_Copy1" Content="Error" HorizontalAlignment="Left" Margin="446,185,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_BinaryDocs_Copy1" Content="GET" HorizontalAlignment="Left" Margin="446,218,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_BinaryExe_Copy1" Content="POST" HorizontalAlignment="Left" Margin="446,251,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_robotstxt_Copy1" Content="HEAD" HorizontalAlignment="Left" Margin="446,284,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_HTML_Copy1" Content="OTHER" HorizontalAlignment="Left" Margin="446,317,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Ascii_Copy1" Content="width" HorizontalAlignment="Left" Margin="446,349,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Zip_Copy1" Content="depth" HorizontalAlignment="Left" Margin="446,382,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Multimedia_Copy1" Content="length" HorizontalAlignment="Left" Margin="446,415,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_Other_Copy1" Content="referrer =&quot;-&quot;" HorizontalAlignment="Left" Margin="446,448,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_TotalTime_Copy1" Content="MultiIP" HorizontalAlignment="Left" Margin="446,481,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
+        <Label x:Name="lable_avgTime_Copy1" Content="MultiAgent" HorizontalAlignment="Left" Margin="446,514,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16" Visibility="Hidden"/>
         <Label x:Name="lable_Night" Content=" " HorizontalAlignment="Left" Margin="608,120,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
         <Label x:Name="lable_repeated" Content=" " HorizontalAlignment="Left" Margin="608,152,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
         <Label x:Name="lable_error" Content=" " HorizontalAlignment="Left" Margin="608,185,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
@@ -80,6 +80,6 @@
         <Label x:Name="lable_length" Content=" " HorizontalAlignment="Left" Margin="608,415,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
         <Label x:Name="lable_referrer" Content="" HorizontalAlignment="Left" Margin="608,448,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
         <Label x:Name="lable_MultiIP" Content=" " HorizontalAlignment="Left" Margin="608,481,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
-        <Label x:Name="lable_MultiAgent" Content=" " HorizontalAlignment="Left" Margin="608,514,0,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
+        <Label x:Name="lable_MultiAgent" Content=" " HorizontalAlignment="Left" Margin="1151,548,-509,0" VerticalAlignment="Top" Width="158" Height="32" FontSize="16"/>
     </Grid>
 </Window>

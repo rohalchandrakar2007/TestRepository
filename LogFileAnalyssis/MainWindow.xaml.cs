@@ -254,16 +254,28 @@ ExecuteQuery(txtSQLQuery);
         List<Session> session = new List<Session>();
         List<Request> requestList = new List<Request>();
         int countLines = -1;
-        int sessionId =-1,tempInt=0;
+        int sessionId =-1,tempInt=0 , sessionTag =0;
         private SQLiteConnection sql_con;
         private SQLiteCommand sql_cmd;
         private SQLiteDataAdapter DB;
         private DataSet DS = new DataSet();
         private DataTable DT = new DataTable();
         private String statusCode = "";
+        private float sessionTime = 30;
+        private bool isUserAgentInvolved= false;
+        private float timeDiffSession = 0;
         public MainWindow()
         {
             InitializeComponent();
+            sessionTimeComboBox.Items.Add("Select Session Time in Minuts");
+            sessionTimeComboBox.Items.Add("5");
+            sessionTimeComboBox.Items.Add("10");
+            sessionTimeComboBox.Items.Add("15");
+            sessionTimeComboBox.Items.Add("20");
+            sessionTimeComboBox.Items.Add("25");
+            sessionTimeComboBox.Items.Add("30");
+            sessionTimeComboBox.Items.Add("35");
+            sessionTimeComboBox.SelectedValue = "Select Session Time in Minuts";
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
@@ -285,7 +297,7 @@ ExecuteQuery(txtSQLQuery);
             //Thread cstatusThread = new Thread(statusTheread);
             //cstatusThread.Start();
             statusBar.Content = "hsfjkadhgk";
-          
+            //sessionTime = float.Parse(sessionTimeComboBox.SelectedValue.ToString());
             if (!filePathString.Equals(""))
             {
                 win.IsEnabled = false;
@@ -302,33 +314,47 @@ ExecuteQuery(txtSQLQuery);
 
                     requestList.Add(new Request(line));
                     countLines++;
-
-                    if (!sessionNametoIdhashtable.Contains(requestList[countLines].userName + " " + requestList[countLines].userAgent))
+                    if ((bool)sessionTimeCheckBox.IsChecked)
+                    {
+                        sessionTime = float.Parse(sessionTimeComboBox.SelectedValue.ToString());
+                        if (sessionId == -1)
+                            timeDiffSession = 0;
+                        else
+                            timeDiffSession = (float)(requestList[countLines].timeStamp - session[sessionId].sessionStartTime).TotalMinutes;
+                        if (timeDiffSession > sessionTime)
+                            sessionTag++;
+                    }
+                    if (!sessionNametoIdhashtable.Contains(requestList[countLines].userName + " " + requestList[countLines].userAgent + sessionTag))
                     {
                         sessionId++;
-                        sessionNametoIdhashtable.Add(requestList[countLines].userName + " " + requestList[countLines].userAgent, sessionId);
+                        sessionNametoIdhashtable.Add(requestList[countLines].userName + " " + requestList[countLines].userAgent + sessionTag, sessionId);
                         session.Add(new Session(sessionId));
                         session[sessionId].sessionStartTime = requestList[countLines].timeStamp;
+                       
                         session[sessionId].requestIdlist.Add(countLines);
                         UpdateSessionClassVariables();
+                        
+                        //if ( timeDiffSession > 30)
+                        //    sessionTag++;
 
 
                     }
                     else
                     {
-                        session[(int)sessionNametoIdhashtable[requestList[countLines].userName + " " + requestList[countLines].userAgent]].requestIdlist.Add(countLines);
+                        session[(int)sessionNametoIdhashtable[requestList[countLines].userName + " " + requestList[countLines].userAgent + sessionTag]].requestIdlist.Add(countLines);
                         UpdateSessionClassVariables();
 
                     }
-                   
+                    
                     //GC.Collect();
                     //GC.WaitForPendingFinalizers();
                 }
-
+                CleanDataBase();
                 /* code for inserting into database */
                 statusBar.Content = "Please Wait (Inserting session detailsinto database...)";
                 for (int i = 0; i < sessionId - 1; i++)
                 {
+
                     UpdateDataBase(i);
                 }
                 
@@ -345,7 +371,11 @@ ExecuteQuery(txtSQLQuery);
           
         }
 
-       
+        private void CleanDataBase()
+        {
+            string txtSQLQuery = "Delete from session" ;
+            ExecuteQuery(txtSQLQuery);
+        }
         private void UpdateStatusBar()
         {
            // statusBar.Content = statusCode;
@@ -459,8 +489,8 @@ ExecuteQuery(txtSQLQuery);
             float p9 = ((float)session[tempSessionId].noOfCompressedFileRequestedInSession / p2) * 100;
             float p10 = ((float)session[tempSessionId].noOfMultimediaFileRequestedInSession / p2) * 100;
             float p11 = ((float)session[tempSessionId].noOfOtherFileFormatRequestedInSession / p2) * 100;
-            float p12 = session[tempSessionId].totalTimeOfTheSession;
-            float p13 = session[tempSessionId].avgTimeBetweenTowHTMLRequests;
+            float p12 = System.Math.Abs(session[tempSessionId].totalTimeOfTheSession);
+            float p13 = System.Math.Abs(session[tempSessionId].avgTimeBetweenTowHTMLRequests);
             long p14 = session[tempSessionId].noOfPagesRequestedInNightTime;
             long p15 = session[tempSessionId].noOfRequestReapted;
             float p16 = ((float)session[tempSessionId].onOfrequestesWithErrors / p2) * 100;
@@ -553,5 +583,27 @@ ExecuteQuery(txtSQLQuery);
         {
             return true;
         }
+
+        private void sessionTimeCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+           sessionTimeComboBox.IsEnabled = true;
+        }
+
+        private void sessionTimeCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            sessionTimeComboBox.IsEnabled = false;
+        }
+
+        private void userAgentInvolved_Checked(object sender, RoutedEventArgs e)
+        {
+            isUserAgentInvolved = true;
+        }
+
+        private void userAgentInvolved_Unchecked(object sender, RoutedEventArgs e)
+        {
+            isUserAgentInvolved = false;
+        }
+
+        
     }
 }

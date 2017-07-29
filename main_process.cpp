@@ -25,7 +25,7 @@ int const RESIZED_IMAGE_WIDTH = 1000;
 int const BLOCK_SIZE = RESIZED_IMAGE_WIDTH * ((float)3 / (float)100);
 int const EDGE_DETECTOR_MIN_THRESHOLD = 40;
 int const EDGE_DETECTOR_MAX_THRESHOLD = 40;
-String face_cascade_name = "/Users/Rohal/Desktop/haarcascade_frontalface_alt.xml";
+String face_cascade_name = "/home/ubuntu/opencv/data/haarcascade_frontalface_alt.xml";
 CascadeClassifier face_cascade;
 
 
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     //-- 1. Load the cascades
     if( !face_cascade.load( face_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
     
-    Mat x = imread("/Users/Rohal/Desktop/dublin-molly-malone.jpg");
+    Mat x = imread("/home/ubuntu/opencv/data/living_small.jpg");
     Mat x_copy = x.clone();
     int new_height = RESIZED_IMAGE_WIDTH * ((float)x_copy.rows / (float)x_copy.cols);
     resize(x_copy, x_copy, Size(RESIZED_IMAGE_WIDTH, new_height));
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
     
     
     Mat invSrc =  cv::Scalar::all(255) - x_edges;
-    saveLowQualityImage(invSrc, "/Users/Rohal/Desktop/saved.jpg", 20);
+    //saveLowQualityImage(invSrc, "/Users/Rohal/Desktop/saved.jpg", 20);
     
 
     

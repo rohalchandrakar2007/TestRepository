@@ -21,10 +21,10 @@ using namespace std;
 using namespace cv;
 
 int const RESIZED_IMAGE_WIDTH = 1000;
-int const BLOCK_SIZE = RESIZED_IMAGE_WIDTH * ((float)3 / (float)100);
+int const BLOCK_SIZE = RESIZED_IMAGE_WIDTH * ((float)2 / (float)100);
 int const EDGE_DETECTOR_MIN_THRESHOLD = 40;
 int const EDGE_DETECTOR_MAX_THRESHOLD = 40;
-String face_cascade_name = "/home/ubuntu/opencv/data/haarcascade_frontalface_alt.xml";
+String face_cascade_name = "/Users/Rohal/Desktop/haarcascade_frontalface_alt.xml";
 CascadeClassifier face_cascade;
 
 
@@ -35,6 +35,13 @@ void saveLowQualityImage(Mat x, string path, int quality){
     cv::imwrite(path, x, compression_params);
 }
 
+
+/* resize image and save it */
+void resizeAndSave(Mat __x, int width, int height, string __path, int __quality){
+    Mat temp;
+    resize(__x, temp, Size(width, height));
+    saveLowQualityImage(temp, __path, __quality);
+}
 
 /** @function detectAndDisplay */
 vector<Rect> detectAndDisplay( Mat frame )
@@ -48,18 +55,35 @@ vector<Rect> detectAndDisplay( Mat frame )
     //-- Detect faces
     face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
     
-    /*for( size_t i = 0; i < faces.size(); i++ )
-    {
-        Point center( faces[i].x + faces[i].width*0.5, faces[i].y + faces[i].height*0.5 );
-        ellipse( frame, center, Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
-        
-        Mat faceROI = frame_gray( faces[i] );
-        std::vector<Rect> eyes;
-    }*/
-    //-- Show what you got
-    //imshow( window_name, frame );
-    
     return faces;
+}
+
+void saveDesiredImages(Mat __x, string __pathSave, string __pathBaseImage, string __fileName){
+    Mat baseMat = imread(__pathBaseImage);
+    //imshow("hkfs", baseMat);
+    Mat x;
+    int new_height = 4096 * ((float)__x.rows / (float)__x.cols);
+    int new_width = 2048 * ((float)__x.cols / (float)__x.rows);
+    //cout << __x.cols << "  " << __x.rows << endl;
+    if(__x.cols > 2 * __x.rows){
+        resize(__x, __x, Size(4096, new_height));
+        //cout << "0 " << ((2048 / 2) - (__x.rows / 2)) << " " << __x.cols << " " << __x.rows << endl;
+        __x.copyTo(baseMat(Rect(0, (2048 / 2) - (__x.rows / 2), __x.cols, __x.rows)));
+    }else{
+        resize(__x, __x, Size(new_width, 2048));
+        __x.copyTo(baseMat(Rect((4096 / 2) - (__x.cols / 2), 0, __x.cols, __x.rows)));
+    }
+    
+    resizeAndSave(baseMat, 4096, 2048, __pathSave + __fileName + "-4096-2048.jpg", 60);
+    resizeAndSave(baseMat, 2048, 1024, __pathSave + __fileName + "-2048-1024.jpg", 60);
+    //resizeAndSave(baseMat, 1024, 512, __pathSave + __fileName + "l.jpg", 60);
+    
+    Mat x_edges;
+    Canny(baseMat, x_edges, EDGE_DETECTOR_MIN_THRESHOLD, EDGE_DETECTOR_MAX_THRESHOLD, 3);
+    Mat invSrc =  cv::Scalar::all(255) - x_edges;
+    resizeAndSave(invSrc, 1024, 512, __pathSave + __fileName + "-1024-512-bw.jpg", 60);
+    
+    resizeAndSave(baseMat, 100, 50, __pathSave + __fileName + "-100-50.jpg", 60);
 }
 
 
@@ -70,15 +94,26 @@ int main(int argc, char* argv[])
         return 0;
     }
     */
-    cout << "hi..." << endl;
-    Mat temp = imread(argv[1]);
-    imshow("m_w", temp);
-    //Mat x = imread(argv[1]);
     
+    string inputFilePath = argv[1];
+    string outputFileDir = argv[2];
+    string inputBaseFile = argv[3];
+    string outputFileName = argv[4];
+    
+    //Mat x = imread(argv[1]);
+    clock_t start, end;
     //-- 1. Load the cascades
     if( !face_cascade.load( face_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
     
-    Mat x = imread("/home/ubuntu/opencv/data/living_small.jpg");
+    start = clock();
+    
+    cout << "start clock" << endl;
+    
+    //Mat x = imread("/Users/Rohal/Desktop/input.jpeg");
+    Mat x = imread(inputFilePath);
+    //saveDesiredImages(x, "/Users/Rohal/Desktop/","/Users/Rohal/Downloads/base.jpg");
+    saveDesiredImages(x, outputFileDir, inputBaseFile, outputFileName);
+    
     Mat x_copy = x.clone();
     int new_height = RESIZED_IMAGE_WIDTH * ((float)x_copy.rows / (float)x_copy.cols);
     resize(x_copy, x_copy, Size(RESIZED_IMAGE_WIDTH, new_height));
@@ -88,11 +123,6 @@ int main(int argc, char* argv[])
     Mat x_edges;
     Canny(x_copy, x_edges, EDGE_DETECTOR_MIN_THRESHOLD, EDGE_DETECTOR_MAX_THRESHOLD, 3);
     
-    
-    Mat invSrc =  cv::Scalar::all(255) - x_edges;
-    //saveLowQualityImage(invSrc, "/Users/Rohal/Desktop/saved.jpg", 20);
-    
-
     
     for(int i = BLOCK_SIZE; i < x_copy.rows - BLOCK_SIZE; i = i + BLOCK_SIZE){
         for(int j = 0; j < x_copy.cols - BLOCK_SIZE; j = j + BLOCK_SIZE){
@@ -171,17 +201,28 @@ int main(int argc, char* argv[])
     }
     int w_fact = (float)x.cols / (float)RESIZED_IMAGE_WIDTH;
     int h_fact = (float)x.rows / (float)new_height;
+    cout << "space: ";
     for(int xi = 0 ; xi < res.size(); xi += 3){
         rectangle( x_edges,Point( res[xi + 2], res[xi + 1] ),Point( res[xi + 2] + res[xi], res[xi + 1] + res[xi]),Scalar( 0, 0, 255 ),-1,8);
         
         cout << res[xi] << " " << res[xi + 2] * w_fact << " " << res[xi + 1] * h_fact << " ";
     }
+    //imshow("m_w", x_edges);
+    //imshow("m_wr", res);
+    
+    cout << endl;
     cout << "faces: ";
     for(int f = 0; f < faces.size(); f++){
         cout << (faces[f].x + faces[f].width * 0.5) * w_fact << " " << (faces[f].y + faces[f].height * 0.5) * h_fact << " ";
     }
+    cout << endl;
     
-    imshow("m_w", x_edges);
+    
+    end = clock();
+    double msecs = ((double) (end - start)) * 1000 / CLOCKS_PER_SEC;
+    cout << "time taken : " << msecs << endl;
+    
+    //imshow("m_w", x_edges);
     
     waitKey(0);
     

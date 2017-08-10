@@ -97,8 +97,9 @@ int main(int argc, char* argv[])
     
     string inputFilePath = argv[1];
     string outputFileDir = argv[2];
-    string inputBaseFile = argv[3];
-    string outputFileName = argv[4];
+    string outputFileName = argv[3];
+    string inputBaseFile = argv[4];
+    string inputHaarFile = argv[5];
     
     //Mat x = imread(argv[1]);
     clock_t start, end;

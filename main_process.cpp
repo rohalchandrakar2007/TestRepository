@@ -6,7 +6,6 @@
 //  Copyright © 2017 Rohal Chandrakar. All rights reserved.
 //
 #include "opencv2/objdetect/objdetect.hpp"
-#include <opencv2/viz.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>

@@ -71,6 +71,8 @@ int main(int argc, char* argv[])
     }
     */
     cout << "hi..." << endl;
+    Mat temp = imread(argv[1]);
+    imshow("m_w", temp);
     //Mat x = imread(argv[1]);
     
     //-- 1. Load the cascades

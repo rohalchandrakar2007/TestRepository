@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     //Mat x = imread(argv[1]);
     clock_t start, end;
     //-- 1. Load the cascades
-    if( !face_cascade.load( face_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
+    if( !face_cascade.load( inputHaarFile ) ){ printf("--(!)Error loading\n"); return -1; };
     
     start = clock();
     

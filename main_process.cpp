@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
         return 0;
     }
     */
-    
+    cout << "hi..." << endl;
     //Mat x = imread(argv[1]);
     
     //-- 1. Load the cascades

@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
     
     //imshow("m_w", x_edges);
     
-    waitKey(0);
+    //waitKey(0);
     
     return 0;
 }

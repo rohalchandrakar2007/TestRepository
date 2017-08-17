@@ -26,6 +26,13 @@ int const EDGE_DETECTOR_MIN_THRESHOLD = 40;
 int const EDGE_DETECTOR_MAX_THRESHOLD = 40;
 String face_cascade_name = "/Users/Rohal/Desktop/haarcascade_frontalface_alt.xml";
 CascadeClassifier face_cascade;
+string msg = "", status = "0", data = "", spaces = "", faces_str = "";
+int processingtime = 0;
+
+void initArgementValues(string __path){
+    
+    
+}
 
 
 void saveLowQualityImage(Mat x, string path, int quality){
@@ -58,8 +65,9 @@ vector<Rect> detectAndDisplay( Mat frame )
     return faces;
 }
 
-void saveDesiredImages(Mat __x, string __pathSave, string __pathBaseImage, string __fileName){
-    Mat baseMat = imread(__pathBaseImage);
+void saveDesiredImages(Mat __x, string __pathSave, Mat __baseMat, string __fileName){
+    Mat baseMat = __baseMat;
+    
     //imshow("hkfs", baseMat);
     Mat x;
     int new_height = 4096 * ((float)__x.rows / (float)__x.cols);
@@ -71,6 +79,7 @@ void saveDesiredImages(Mat __x, string __pathSave, string __pathBaseImage, strin
         __x.copyTo(baseMat(Rect(0, (2048 / 2) - (__x.rows / 2), __x.cols, __x.rows)));
     }else{
         resize(__x, __x, Size(new_width, 2048));
+        //cout << "0 " << ((2048 / 2) - (__x.rows / 2)) << " " << __x.cols << " " << __x.rows << endl;
         __x.copyTo(baseMat(Rect((4096 / 2) - (__x.cols / 2), 0, __x.cols, __x.rows)));
     }
     
@@ -87,33 +96,82 @@ void saveDesiredImages(Mat __x, string __pathSave, string __pathBaseImage, strin
 }
 
 
+bool isPanorama(Mat __x){
+    Mat x_edges;
+    resize(__x, __x, Size(1024, 2048));
+    Canny(__x, x_edges, 150, 150, 3);
+    
+    imshow("edges", x_edges);
+    return 0;
+}
+
+
+void writeData(){
+    string str = "";
+    str = "{'status': " + status + ",'message': '" + msg + "','data': " + data + ", 'processingtime': " + to_string(processingtime) + "}";
+    cout << str << endl;
+}
+
 int main(int argc, char* argv[])
 {
-    /*if(argc < 1){
-        cout << "arvind please enter the file path as parameter" << endl;
-        return 0;
+    if(argc < 4){
+        //cout << "Please enter the correct parameters" << endl;
+        msg = "Please enter the correct parameters";
+        writeData();
+        return -1;
     }
-    */
+    
     
     string inputFilePath = argv[1];
     string outputFileDir = argv[2];
     string outputFileName = argv[3];
     string inputBaseFile = argv[4];
-    string inputHaarFile = argv[5];
+    face_cascade_name = argv[5];
     
-    //Mat x = imread(argv[1]);
+    
+    
+    
     clock_t start, end;
-    //-- 1. Load the cascades
-    if( !face_cascade.load( inputHaarFile ) ){ printf("--(!)Error loading\n"); return -1; };
+    // Load the cascades
+    if( !face_cascade.load( face_cascade_name ) )
+    {
+        msg = "Error loading Haar file please chaeck the path...";
+        writeData();
+        return -1;
+    };
     
     start = clock();
     
-    cout << "start clock" << endl;
+    //cout << "start clock" << endl;
     
-    //Mat x = imread("/Users/Rohal/Desktop/input.jpeg");
+    // load input image
+    
     Mat x = imread(inputFilePath);
-    //saveDesiredImages(x, "/Users/Rohal/Desktop/","/Users/Rohal/Downloads/base.jpg");
-    saveDesiredImages(x, outputFileDir, inputBaseFile, outputFileName);
+    if(! x.data )                              // Check for invalid input
+    {
+        msg = "Could not open or find the image...";
+        writeData();
+        return -1;
+    }
+    
+    
+    // load input base image
+    
+    Mat xBsaeImg = imread(inputBaseFile);
+    if(! xBsaeImg.data )                              // Check for invalid input
+    {
+        msg = "Could not open or find the base image...";
+        writeData();
+        return -1;
+    }
+    
+    //saveDesiredImages(x, "/Users/Rohal/Desktop/", xBsaeImg, "test_save");
+    
+    
+    //Mat x = imread(inputFilePath);
+    saveDesiredImages(x, outputFileDir, xBsaeImg, outputFileName);
+    
+    
     
     Mat x_copy = x.clone();
     int new_height = RESIZED_IMAGE_WIDTH * ((float)x_copy.rows / (float)x_copy.cols);
@@ -202,27 +260,45 @@ int main(int argc, char* argv[])
     }
     int w_fact = (float)x.cols / (float)RESIZED_IMAGE_WIDTH;
     int h_fact = (float)x.rows / (float)new_height;
-    cout << "space: ";
+    //cout << "space: ";
+    spaces += "'spaces': [";
     for(int xi = 0 ; xi < res.size(); xi += 3){
         rectangle( x_edges,Point( res[xi + 2], res[xi + 1] ),Point( res[xi + 2] + res[xi], res[xi + 1] + res[xi]),Scalar( 0, 0, 255 ),-1,8);
-        
-        cout << res[xi] << " " << res[xi + 2] * w_fact << " " << res[xi + 1] * h_fact << " ";
+        if(xi != 0)
+            spaces += ",";
+        spaces += "{'radius': " + to_string(res[xi]) + ", 'xcord': " + to_string((res[xi + 2] * w_fact)) + ", 'ycord': " + to_string(res[xi + 1] * h_fact) + "}";
+        //cout << res[xi] << " " << res[xi + 2] * w_fact << " " << res[xi + 1] * h_fact << " ";
     }
+    spaces += "]";
+    //cout << spaces << endl;
     //imshow("m_w", x_edges);
     //imshow("m_wr", res);
     
-    cout << endl;
-    cout << "faces: ";
+    //cout << endl;
+    //cout << "faces: ";
+    faces_str += "'faces': [";
     for(int f = 0; f < faces.size(); f++){
-        cout << (faces[f].x + faces[f].width * 0.5) * w_fact << " " << (faces[f].y + faces[f].height * 0.5) * h_fact << " ";
+        //cout << (faces[f].x + faces[f].width * 0.5) * w_fact << " " << (faces[f].y + faces[f].height * 0.5) * h_fact << " ";
+        
+        if(f != 0)
+            faces_str += ",";
+        faces_str += "{'xcord': " + to_string(((faces[f].x + faces[f].width * 0.5) * w_fact)) + ", 'ycord': " + to_string((faces[f].y + faces[f].height * 0.5) * h_fact) + "}";
     }
-    cout << endl;
+    faces_str += "]";
+    //cout << faces_str;
+    //cout << endl;
     
+    data = "{"+ spaces + ", " + faces_str +"}";
     
     end = clock();
     double msecs = ((double) (end - start)) * 1000 / CLOCKS_PER_SEC;
-    cout << "time taken : " << msecs << endl;
     
+    status = "1";
+    msg = "completed";
+    processingtime = msecs;
+    //cout << "time taken : " << msecs << endl;
+    
+    writeData();
     //imshow("m_w", x_edges);
     
     //waitKey(0);

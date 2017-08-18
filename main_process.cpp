@@ -25,6 +25,7 @@ int const BLOCK_SIZE = RESIZED_IMAGE_WIDTH * ((float)2 / (float)100);
 int const EDGE_DETECTOR_MIN_THRESHOLD = 40;
 int const EDGE_DETECTOR_MAX_THRESHOLD = 40;
 String face_cascade_name = "/Users/Rohal/Desktop/haarcascade_frontalface_alt.xml";
+String output_config = "/Users/Rohal/Desktop/output_config.neo";
 CascadeClassifier face_cascade;
 string msg = "", status = "0", data = "", spaces = "", faces_str = "";
 int processingtime = 0;
@@ -32,6 +33,18 @@ int processingtime = 0;
 void initArgementValues(string __path){
     
     
+}
+
+
+vector<string> split(const string &text, char sep) {
+    vector<string> tokens;
+    std::size_t start = 0, end = 0;
+    while ((end = text.find(sep, start)) != string::npos) {
+        tokens.push_back(text.substr(start, end - start));
+        start = end + 1;
+    }
+    tokens.push_back(text.substr(start));
+    return tokens;
 }
 
 
@@ -67,8 +80,6 @@ vector<Rect> detectAndDisplay( Mat frame )
 
 void saveDesiredImages(Mat __x, string __pathSave, Mat __baseMat, string __fileName){
     Mat baseMat = __baseMat;
-    
-    //imshow("hkfs", baseMat);
     Mat x;
     int new_height = 4096 * ((float)__x.rows / (float)__x.cols);
     int new_width = 2048 * ((float)__x.cols / (float)__x.rows);
@@ -83,16 +94,30 @@ void saveDesiredImages(Mat __x, string __pathSave, Mat __baseMat, string __fileN
         __x.copyTo(baseMat(Rect((4096 / 2) - (__x.cols / 2), 0, __x.cols, __x.rows)));
     }
     
-    resizeAndSave(baseMat, 4096, 2048, __pathSave + __fileName + "-4096-2048.jpg", 60);
-    resizeAndSave(baseMat, 2048, 1024, __pathSave + __fileName + "-2048-1024.jpg", 60);
-    //resizeAndSave(baseMat, 1024, 512, __pathSave + __fileName + "l.jpg", 60);
     
-    Mat x_edges;
-    Canny(baseMat, x_edges, EDGE_DETECTOR_MIN_THRESHOLD, EDGE_DETECTOR_MAX_THRESHOLD, 3);
-    Mat invSrc =  cv::Scalar::all(255) - x_edges;
-    resizeAndSave(invSrc, 1024, 512, __pathSave + __fileName + "-1024-512-bw.jpg", 60);
-    
-    resizeAndSave(baseMat, 100, 50, __pathSave + __fileName + "-100-50.jpg", 60);
+    ifstream infile(output_config);
+    string line;
+    while (std::getline(infile, line))
+    {
+        std::istringstream iss(line);
+        int a, b;
+        vector<string> strs1 = split(line, ':');
+        string temp_name = strs1[0];
+        vector<string> strs2 = split(strs1[1], 'x');
+        int temp_width = stoi(strs2[0]);
+        int temp_height = stoi(strs2[1]);
+        
+        if(temp_name == "low"){
+            Mat x_edges;
+            Canny(baseMat, x_edges, EDGE_DETECTOR_MIN_THRESHOLD, EDGE_DETECTOR_MAX_THRESHOLD, 3);
+            Mat invSrc =  cv::Scalar::all(255) - x_edges;
+            resizeAndSave(invSrc, temp_width, temp_height, __pathSave + __fileName + "-" + strs2[0] + "-" + strs2[1] + ".jpg", 60);
+        }
+        else{
+            resizeAndSave(baseMat, temp_width, temp_height, __pathSave + __fileName + "-" + strs2[0] + "-" + strs2[1] + ".jpg", 60);
+        }
+    }
+
 }
 
 
@@ -114,11 +139,9 @@ void writeData(){
 
 int main(int argc, char* argv[])
 {
-    if(argc < 4){
-        //cout << "Please enter the correct parameters" << endl;
-        msg = "Please enter the correct parameters";
-        writeData();
-        return -1;
+    if(argc < 5){
+        cout << "please enter correct parameters..." << endl;
+        return 0;
     }
     
     
@@ -127,6 +150,7 @@ int main(int argc, char* argv[])
     string outputFileName = argv[3];
     string inputBaseFile = argv[4];
     face_cascade_name = argv[5];
+    output_config = argv[6];
     
     
     
@@ -168,7 +192,7 @@ int main(int argc, char* argv[])
     //saveDesiredImages(x, "/Users/Rohal/Desktop/", xBsaeImg, "test_save");
     
     
-    //Mat x = imread(inputFilePath);
+    Mat x = imread(inputFilePath);
     saveDesiredImages(x, outputFileDir, xBsaeImg, outputFileName);
     
     

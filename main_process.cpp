@@ -95,7 +95,7 @@ void saveDesiredImages(Mat __x, string __pathSave, Mat __baseMat, string __fileN
     }
     
     
-    ifstream infile(output_config);
+    ifstream infile(output_config.c_str());
     string line;
     while (std::getline(infile, line))
     {
@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
     //saveDesiredImages(x, "/Users/Rohal/Desktop/", xBsaeImg, "test_save");
     
     
-    Mat x = imread(inputFilePath);
+    //Mat x = imread(inputFilePath);
     saveDesiredImages(x, outputFileDir, xBsaeImg, outputFileName);
     
     

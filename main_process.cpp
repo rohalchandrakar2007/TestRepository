@@ -28,6 +28,7 @@ string outputFileDir = "/Users/Rohal/Desktop/";
 string inputFilePath = "/Users/Rohal/Desktop/input.jpg";
 string inputBaseFile = "/Users/Rohal/Downloads/base.jpg";
 String face_cascade_name = "/Users/Rohal/Desktop/haarcascade_frontalface_alt.xml";
+string outputFileName = "";
 String output_config = "/Users/Rohal/Desktop/output_config.neo";
 CascadeClassifier face_cascade;
 string msg = "", status = "0", data = "", spaces = "", faces_str = "";
@@ -196,7 +197,7 @@ int main(int argc, char* argv[])
         return -1;
     }
     
-    saveDesiredImages(x, outputFileDir, xBsaeImg, "test_save");
+    saveDesiredImages(x, outputFileDir, xBsaeImg, outputFileName);
     
     
     //Mat x = imread(inputFilePath);

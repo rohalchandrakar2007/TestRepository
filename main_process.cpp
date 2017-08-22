@@ -24,6 +24,9 @@ int const RESIZED_IMAGE_WIDTH = 1000;
 int const BLOCK_SIZE = RESIZED_IMAGE_WIDTH * ((float)2 / (float)100);
 int const EDGE_DETECTOR_MIN_THRESHOLD = 40;
 int const EDGE_DETECTOR_MAX_THRESHOLD = 40;
+string outputFileDir = "/Users/Rohal/Desktop/";
+string inputFilePath = "/Users/Rohal/Desktop/input.jpg";
+string inputBaseFile = "/Users/Rohal/Downloads/base.jpg";
 String face_cascade_name = "/Users/Rohal/Desktop/haarcascade_frontalface_alt.xml";
 String output_config = "/Users/Rohal/Desktop/output_config.neo";
 CascadeClassifier face_cascade;
@@ -84,23 +87,28 @@ void saveDesiredImages(Mat __x, string __pathSave, Mat __baseMat, string __fileN
     int new_height = 4096 * ((float)__x.rows / (float)__x.cols);
     int new_width = 2048 * ((float)__x.cols / (float)__x.rows);
     //cout << __x.cols << "  " << __x.rows << endl;
-    if(__x.cols > 2 * __x.rows){
-        resize(__x, __x, Size(4096, new_height));
-        //cout << "0 " << ((2048 / 2) - (__x.rows / 2)) << " " << __x.cols << " " << __x.rows << endl;
-        __x.copyTo(baseMat(Rect(0, (2048 / 2) - (__x.rows / 2), __x.cols, __x.rows)));
-    }else{
-        resize(__x, __x, Size(new_width, 2048));
-        //cout << "0 " << ((2048 / 2) - (__x.rows / 2)) << " " << __x.cols << " " << __x.rows << endl;
-        __x.copyTo(baseMat(Rect((4096 / 2) - (__x.cols / 2), 0, __x.cols, __x.rows)));
+    if(__x.cols < 2048 && __x.rows < 2048){
+        __x.copyTo(baseMat(Rect((4096 / 2) - (__x.cols / 2), (2048 / 2) - (__x.rows / 2), __x.cols, __x.rows)));
+    }
+    else{
+        if(__x.cols > 2 * __x.rows){
+            resize(__x, __x, Size(4096, new_height));
+            //cout << "0 " << ((2048 / 2) - (__x.rows / 2)) << " " << __x.cols << " " << __x.rows << endl;
+            __x.copyTo(baseMat(Rect(0, (2048 / 2) - (__x.rows / 2), __x.cols, __x.rows)));
+        }else{
+            resize(__x, __x, Size(new_width, 2048));
+            //cout << "0 " << ((2048 / 2) - (__x.rows / 2)) << " " << __x.cols << " " << __x.rows << endl;
+            __x.copyTo(baseMat(Rect((4096 / 2) - (__x.cols / 2), 0, __x.cols, __x.rows)));
+        }
     }
     
     
-    ifstream infile(output_config.c_str());
+    
+    ifstream infile(output_config);
     string line;
-    while (std::getline(infile, line))
+    while (getline(infile, line))
     {
         std::istringstream iss(line);
-        int a, b;
         vector<string> strs1 = split(line, ':');
         string temp_name = strs1[0];
         vector<string> strs2 = split(strs1[1], 'x');
@@ -111,13 +119,12 @@ void saveDesiredImages(Mat __x, string __pathSave, Mat __baseMat, string __fileN
             Mat x_edges;
             Canny(baseMat, x_edges, EDGE_DETECTOR_MIN_THRESHOLD, EDGE_DETECTOR_MAX_THRESHOLD, 3);
             Mat invSrc =  cv::Scalar::all(255) - x_edges;
-            resizeAndSave(invSrc, temp_width, temp_height, __pathSave + __fileName + "-" + strs2[0] + "-" + strs2[1] + ".jpg", 60);
+            resizeAndSave(invSrc, temp_width, temp_height, __pathSave + __fileName + "-" + temp_name + "-" + strs2[0] + "-" + strs2[1] + ".jpg", 60);
         }
         else{
-            resizeAndSave(baseMat, temp_width, temp_height, __pathSave + __fileName + "-" + strs2[0] + "-" + strs2[1] + ".jpg", 60);
+            resizeAndSave(baseMat, temp_width, temp_height, __pathSave + __fileName + "-" + temp_name + "-" + strs2[0] + "-" + strs2[1] + ".jpg", 60);
         }
     }
-
 }
 
 
@@ -139,16 +146,16 @@ void writeData(){
 
 int main(int argc, char* argv[])
 {
-    if(argc < 5){
-        cout << "please enter correct parameters..." << endl;
+    if(argc < 1){
+        cout << "arvind please enter the file path as parameter" << endl;
         return 0;
     }
     
     
-    string inputFilePath = argv[1];
-    string outputFileDir = argv[2];
-    string outputFileName = argv[3];
-    string inputBaseFile = argv[4];
+    inputFilePath = argv[1];
+    outputFileDir = argv[2];
+    outputFileName = argv[3];
+    inputBaseFile = argv[4];
     face_cascade_name = argv[5];
     output_config = argv[6];
     
@@ -189,11 +196,11 @@ int main(int argc, char* argv[])
         return -1;
     }
     
-    //saveDesiredImages(x, "/Users/Rohal/Desktop/", xBsaeImg, "test_save");
+    saveDesiredImages(x, outputFileDir, xBsaeImg, "test_save");
     
     
     //Mat x = imread(inputFilePath);
-    saveDesiredImages(x, outputFileDir, xBsaeImg, outputFileName);
+    //saveDesiredImages(x, outputFileDir, inputBaseFile, outputFileName);
     
     
     

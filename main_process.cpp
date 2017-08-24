@@ -4,6 +4,8 @@
 //
 //  Created by Rohal Chandrakar on 7/25/17.
 //  Copyright © 2017 Rohal Chandrakar. All rights reserved.
+
+
 //
 #include "opencv2/objdetect/objdetect.hpp"
 #include <opencv2/calib3d.hpp>
@@ -17,18 +19,30 @@
 #include <string>
 #include <map>
 
+
+/*
+ 
+ Env c++ compile command: 
+ 
+ sudo g++ -std=c++0x -ggdb `pkg-config --cflags opencv` -o `basename main_process.cpp .cpp` main_process.cpp `pkg-
+ config --libs opencv`
+ 
+ */
+
 using namespace std;
 using namespace cv;
 
 int const RESIZED_IMAGE_WIDTH = 1000;
 int const BLOCK_SIZE = RESIZED_IMAGE_WIDTH * ((float)2 / (float)100);
-int const EDGE_DETECTOR_MIN_THRESHOLD = 40;
-int const EDGE_DETECTOR_MAX_THRESHOLD = 40;
+float const VIRTICLE_SCANNING_FACTOR_LOW = 0.4, VIRTICLE_SCANNING_FACTOR_HIGH = 0.7;
+int const EDGE_DETECTOR_MIN_THRESHOLD = 70;
+int const EDGE_DETECTOR_MAX_THRESHOLD = 70;
 string outputFileDir = "/Users/Rohal/Desktop/";
-string inputFilePath = "/Users/Rohal/Desktop/input.jpg";
+string inputFilePath = "/Users/Rohal/Desktop/i0000_4k.jpg";
 string inputBaseFile = "/Users/Rohal/Downloads/base.jpg";
 String face_cascade_name = "/Users/Rohal/Desktop/haarcascade_frontalface_alt.xml";
 string outputFileName = "";
+String neoLogoPath = "/Users/Rohal/Desktop/logo-1.png";
 String output_config = "/Users/Rohal/Desktop/output_config.neo";
 CascadeClassifier face_cascade;
 string msg = "", status = "0", data = "", spaces = "", faces_str = "";
@@ -147,7 +161,7 @@ void writeData(){
 
 int main(int argc, char* argv[])
 {
-    if(argc < 1){
+    if(argc < 5){
         cout << "arvind please enter the file path as parameter" << endl;
         return 0;
     }
@@ -159,6 +173,7 @@ int main(int argc, char* argv[])
     inputBaseFile = argv[4];
     face_cascade_name = argv[5];
     output_config = argv[6];
+    neoLogoPath = argv[6];
     
     
     
@@ -178,8 +193,8 @@ int main(int argc, char* argv[])
     
     // load input image
     
-    Mat x = imread(inputFilePath);
-    if(! x.data )                              // Check for invalid input
+    Mat xImg = imread(inputFilePath);
+    if(! xImg.data )                              // Check for invalid input
     {
         msg = "Could not open or find the image...";
         writeData();
@@ -197,7 +212,16 @@ int main(int argc, char* argv[])
         return -1;
     }
     
-    saveDesiredImages(x, outputFileDir, xBsaeImg, outputFileName);
+    
+    Mat neoLogo = imread(neoLogoPath);
+    if(! neoLogo.data )                              // Check for invalid input
+    {
+        msg = "Could not open or find the neo logo image...";
+        writeData();
+        return -1;
+    }
+    
+    //saveDesiredImages(x, outputFileDir, xBsaeImg, outputFileName);
     
     
     //Mat x = imread(inputFilePath);
@@ -205,7 +229,7 @@ int main(int argc, char* argv[])
     
     
     
-    Mat x_copy = x.clone();
+    Mat x_copy = xImg.clone();
     int new_height = RESIZED_IMAGE_WIDTH * ((float)x_copy.rows / (float)x_copy.cols);
     resize(x_copy, x_copy, Size(RESIZED_IMAGE_WIDTH, new_height));
     vector<Rect> faces = detectAndDisplay(x_copy);
@@ -249,7 +273,7 @@ int main(int argc, char* argv[])
     pair<int, int> optimal;
     //map<int, pair<int, int>> res;
     vector<int> res;
-    for(int i = new_height / 4; i < new_height * 6 / 10; i++){
+    for(int i = new_height * VIRTICLE_SCANNING_FACTOR_LOW; i < new_height * VIRTICLE_SCANNING_FACTOR_HIGH; i++){
         for(int j = 0; j < x_edges.cols; j++){
             
             Vec3b color = x_edges.at<Vec3b>(i,j);
@@ -290,9 +314,40 @@ int main(int argc, char* argv[])
             
         }
     }
-    int w_fact = (float)x.cols / (float)RESIZED_IMAGE_WIDTH;
-    int h_fact = (float)x.rows / (float)new_height;
+    int w_fact = (float)xImg.cols / (float)RESIZED_IMAGE_WIDTH;
+    int h_fact = (float)xImg.rows / (float)new_height;
     //cout << "space: ";
+    
+    
+    //clearing and normalizing data
+    map<int , pair<int, int>> tempMap;
+    int maxSpace = -10000, savedXI = 0;
+    for(int xi = 0 ; xi < res.size(); xi += 3){
+        //tempMap[res[xi]] = make_pair(to_string((res[xi + 2] * w_fact)), to_string(res[xi + 1] * h_fact));
+        if(res[xi] >= maxSpace){
+            savedXI = xi;
+            maxSpace = res[xi];
+        }
+        
+    }
+    if(maxSpace != -10000){
+        resize(neoLogo, neoLogo, Size(maxSpace * w_fact, maxSpace * h_fact));
+        neoLogo.copyTo(xImg(Rect((res[savedXI + 2] * w_fact), res[savedXI + 1] * h_fact, neoLogo.cols,neoLogo.rows)));
+        //cout << res[savedXI + 2] * w_fact << "   " << res[savedXI + 1] * h_fact << endl;
+        //__x.copyTo(baseMat(Rect((4096 / 2) - (__x.cols / 2), 0, __x.cols, __x.rows)));
+    }
+    //imshow("m_w", xImg);
+    //imshow("m_wr", x_edges);
+    saveDesiredImages(xImg, outputFileDir, xBsaeImg, outputFileName);
+    
+    
+    
+    
+    
+    
+    
+    
+    
     spaces += "'spaces': [";
     for(int xi = 0 ; xi < res.size(); xi += 3){
         rectangle( x_edges,Point( res[xi + 2], res[xi + 1] ),Point( res[xi + 2] + res[xi], res[xi + 1] + res[xi]),Scalar( 0, 0, 255 ),-1,8);
@@ -302,12 +357,14 @@ int main(int argc, char* argv[])
         //cout << res[xi] << " " << res[xi + 2] * w_fact << " " << res[xi + 1] * h_fact << " ";
     }
     spaces += "]";
-    //cout << spaces << endl;
-    //imshow("m_w", x_edges);
-    //imshow("m_wr", res);
     
-    //cout << endl;
-    //cout << "faces: ";
+    
+    
+    
+    
+    
+    
+    
     faces_str += "'faces': [";
     for(int f = 0; f < faces.size(); f++){
         //cout << (faces[f].x + faces[f].width * 0.5) * w_fact << " " << (faces[f].y + faces[f].height * 0.5) * h_fact << " ";
@@ -317,10 +374,13 @@ int main(int argc, char* argv[])
         faces_str += "{'xcord': " + to_string(((faces[f].x + faces[f].width * 0.5) * w_fact)) + ", 'ycord': " + to_string((faces[f].y + faces[f].height * 0.5) * h_fact) + "}";
     }
     faces_str += "]";
-    //cout << faces_str;
-    //cout << endl;
+    
     
     data = "{"+ spaces + ", " + faces_str +"}";
+    
+    
+    
+    
     
     end = clock();
     double msecs = ((double) (end - start)) * 1000 / CLOCKS_PER_SEC;
@@ -331,7 +391,7 @@ int main(int argc, char* argv[])
     //cout << "time taken : " << msecs << endl;
     
     writeData();
-    //imshow("m_w", x_edges);
+    //imshow("m_wy", x_edges);
     
     //waitKey(0);
     

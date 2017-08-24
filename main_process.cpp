@@ -320,7 +320,7 @@ int main(int argc, char* argv[])
     
     
     //clearing and normalizing data
-    map<int , pair<int, int>> tempMap;
+    //map<int , pair<int, int>> tempMap;
     int maxSpace = -10000, savedXI = 0;
     for(int xi = 0 ; xi < res.size(); xi += 3){
         //tempMap[res[xi]] = make_pair(to_string((res[xi + 2] * w_fact)), to_string(res[xi + 1] * h_fact));

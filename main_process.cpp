@@ -155,13 +155,13 @@ bool isPanorama(Mat __x){
 
 void writeData(){
     string str = "";
-    str = "{'status': " + status + ",'message': '" + msg + "','data': " + data + ", 'processingtime': " + to_string(processingtime) + "}";
+    str = "{\"status\": " + status + ",\"message\": \"" + msg + "\",\"data\": " + data + ", \"processingtime\": " + to_string(processingtime) + "}";
     cout << str << endl;
 }
 
 int main(int argc, char* argv[])
 {
-    if(argc < 5){
+    if(argc < 6){
         cout << "arvind please enter the file path as parameter" << endl;
         return 0;
     }
@@ -320,7 +320,7 @@ int main(int argc, char* argv[])
     
     
     //clearing and normalizing data
-    //map<int , pair<int, int>> tempMap;
+    map<int , pair<int, int>> tempMap;
     int maxSpace = -10000, savedXI = 0;
     for(int xi = 0 ; xi < res.size(); xi += 3){
         //tempMap[res[xi]] = make_pair(to_string((res[xi + 2] * w_fact)), to_string(res[xi + 1] * h_fact));
@@ -348,12 +348,12 @@ int main(int argc, char* argv[])
     
     
     
-    spaces += "'spaces': [";
+    spaces += "\"spaces\": [";
     for(int xi = 0 ; xi < res.size(); xi += 3){
         rectangle( x_edges,Point( res[xi + 2], res[xi + 1] ),Point( res[xi + 2] + res[xi], res[xi + 1] + res[xi]),Scalar( 0, 0, 255 ),-1,8);
         if(xi != 0)
             spaces += ",";
-        spaces += "{'radius': " + to_string(res[xi]) + ", 'xcord': " + to_string((res[xi + 2] * w_fact)) + ", 'ycord': " + to_string(res[xi + 1] * h_fact) + "}";
+        spaces += "{\"radius\": " + to_string(res[xi]) + ", \"xcord\": " + to_string((res[xi + 2] * w_fact)) + ", \"ycord\": " + to_string(res[xi + 1] * h_fact) + "}";
         //cout << res[xi] << " " << res[xi + 2] * w_fact << " " << res[xi + 1] * h_fact << " ";
     }
     spaces += "]";
@@ -365,13 +365,13 @@ int main(int argc, char* argv[])
     
     
     
-    faces_str += "'faces': [";
+    faces_str += "\"faces\": [";
     for(int f = 0; f < faces.size(); f++){
         //cout << (faces[f].x + faces[f].width * 0.5) * w_fact << " " << (faces[f].y + faces[f].height * 0.5) * h_fact << " ";
         
         if(f != 0)
             faces_str += ",";
-        faces_str += "{'xcord': " + to_string(((faces[f].x + faces[f].width * 0.5) * w_fact)) + ", 'ycord': " + to_string((faces[f].y + faces[f].height * 0.5) * h_fact) + "}";
+        faces_str += "{\"xcord\": " + to_string(((faces[f].x + faces[f].width * 0.5) * w_fact)) + ", \"ycord\": " + to_string((faces[f].y + faces[f].height * 0.5) * h_fact) + "}";
     }
     faces_str += "]";
     

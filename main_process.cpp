@@ -162,7 +162,7 @@ void writeData(){
 int main(int argc, char* argv[])
 {
     if(argc < 6){
-        cout << "arvind please enter the file path as parameter" << endl;
+        cout << "please enter the file path as parameter" << endl;
         return 0;
     }
     
@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
     inputBaseFile = argv[4];
     face_cascade_name = argv[5];
     output_config = argv[6];
-    neoLogoPath = argv[6];
+    //neoLogoPath = argv[6];
     
     
     
@@ -213,13 +213,13 @@ int main(int argc, char* argv[])
     }
     
     
-    Mat neoLogo = imread(neoLogoPath);
+    /*Mat neoLogo = imread(neoLogoPath);
     if(! neoLogo.data )                              // Check for invalid input
     {
         msg = "Could not open or find the neo logo image...";
         writeData();
         return -1;
-    }
+    }*/
     
     //saveDesiredImages(x, outputFileDir, xBsaeImg, outputFileName);
     
@@ -331,8 +331,8 @@ int main(int argc, char* argv[])
         
     }
     if(maxSpace != -10000){
-        resize(neoLogo, neoLogo, Size(maxSpace * w_fact, maxSpace * h_fact));
-        neoLogo.copyTo(xImg(Rect((res[savedXI + 2] * w_fact), res[savedXI + 1] * h_fact, neoLogo.cols,neoLogo.rows)));
+        //resize(neoLogo, neoLogo, Size(maxSpace * w_fact, maxSpace * h_fact));
+        //neoLogo.copyTo(xImg(Rect((res[savedXI + 2] * w_fact), res[savedXI + 1] * h_fact, neoLogo.cols,neoLogo.rows)));
         //cout << res[savedXI + 2] * w_fact << "   " << res[savedXI + 1] * h_fact << endl;
         //__x.copyTo(baseMat(Rect((4096 / 2) - (__x.cols / 2), 0, __x.cols, __x.rows)));
     }
@@ -353,7 +353,7 @@ int main(int argc, char* argv[])
         rectangle( x_edges,Point( res[xi + 2], res[xi + 1] ),Point( res[xi + 2] + res[xi], res[xi + 1] + res[xi]),Scalar( 0, 0, 255 ),-1,8);
         if(xi != 0)
             spaces += ",";
-        spaces += "{\"radius\": " + to_string(res[xi]) + ", \"xcord\": " + to_string((res[xi + 2] * w_fact)) + ", \"ycord\": " + to_string(res[xi + 1] * h_fact) + "}";
+        spaces += "{\"radius\": " + to_string((res[xi] * 100.0)/ (float)(xImg.cols)) + ", \"xcord\": " + to_string(((res[xi + 2] * w_fact) * 100.0 / (float)(xImg.cols))) + ", \"ycord\": " + to_string((res[xi + 1] * h_fact * 100.0) / (float)(xImg.rows)) + "}";
         //cout << res[xi] << " " << res[xi + 2] * w_fact << " " << res[xi + 1] * h_fact << " ";
     }
     spaces += "]";
@@ -371,12 +371,13 @@ int main(int argc, char* argv[])
         
         if(f != 0)
             faces_str += ",";
-        faces_str += "{\"xcord\": " + to_string(((faces[f].x + faces[f].width * 0.5) * w_fact)) + ", \"ycord\": " + to_string((faces[f].y + faces[f].height * 0.5) * h_fact) + "}";
+        faces_str += "{\"xcord\": " + to_string(((faces[f].x + faces[f].width * 0.5) * w_fact * 100.0) / (float)(xImg.cols)) + ", \"ycord\": " + to_string(((faces[f].y + faces[f].height * 0.5) * h_fact * 100.0) / (float)(xImg.rows)) + "}";
     }
     faces_str += "]";
     
     
     data = "{"+ spaces + ", " + faces_str +"}";
+    
     
     
     
